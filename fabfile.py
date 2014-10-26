@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-from fabric.api import local as run, task
+from fabric.api import local as run, task, quiet
 import subprocess as sub
 import argparse
 import os
@@ -166,5 +166,17 @@ def clean():
     run('echo -n > data/train.txt')
     run('echo -n > data/test.txt')
 
-
-
+@task
+def count():
+    dir_path = join(DATA_DIR, 'audio')
+    total = 0
+    print 'Counting...'
+    for fname in os.listdir(dir_path):
+        with quiet():
+            secs = run('metaflac --show-total-samples --show-sample-rate ' +
+                       join(dir_path, fname) + ' ' +
+                       '| tr \'\n\' \' \' | awk \'{print $1/$2}\'', capture=True)
+        total += float(secs)
+    print '%.1f seconds of audio.' % (total, )
+    print '%.1f minutes of audio.' % (total / 60, )
+    print '%.2f hours of audio.' % ( total / 3600, )
