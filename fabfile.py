@@ -46,8 +46,24 @@ def ripdvd(src):
 def process(src):
     """Input: mkv
     Output: Audio files written and test/train written"""
+    if already_ripped(src):
+        print src, 'has already been ripped.'
+        return
     wav, srt = riptracks(src)
     process_wav(wav)
+
+
+@task
+def batch():
+    for src in os.listdir(MOVIE_DIR):
+        if not already_ripped(src):
+            process(join(MOVIE_DIR, src))
+
+
+def already_ripped(src):
+    name = os.path.splitext(os.path.basename(src))[0]
+    txt = join(DATA_DIR, 'rips', name+".txt")
+    return os.path.exists(txt)
 
 
 def riptracks(src):
