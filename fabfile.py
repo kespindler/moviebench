@@ -88,6 +88,7 @@ def clean_subtitle(text):
 def flacify(wav_bytes):
     p = sub.Popen(['flac', '-'], stdout=sub.PIPE, stdin=sub.PIPE, stderr=sub.STDOUT)
     result = p.communicate(input=wav_bytes)[0]
+    print result
     return result
 
 
@@ -130,10 +131,19 @@ def process_wav(src):
     train_f = open(join(DATA_DIR, 'train.txt'), 'a')
     for line, wav_data in valid_lines:
         code = '%016x' % random.randrange(16**16)
-        flac = flacify(wav_data)
-        fpath = join(DATA_DIR, 'audio', code + '.flac')
-        with open(fpath) as flac_f:
-            flac_f.write(flac)
+
+        fname = join(DATA_DIR, 'audio', code + '.wav')
+        outwav = wave.open(fname, 'w')
+        outwav.setparams(wav.getparams())
+        outwav.writeframes(wav_data)
+
+        sub.check_call(['flac', fname])
+        #flac = flacify(wav_data)
+        #fpath = join(DATA_DIR, 'audio', code + '.flac')
+        #with open(fpath, 'w') as flac_f:
+        #   flac_f.write(flac)
+        os.remove(fname)
+
         if random.random() > .9:
             f = test_f
         else:
@@ -149,6 +159,12 @@ def benchmark_google():
     google.query_results(test)
     google.score_results()
     
+
+@task
+def clean():
+    run('rm data/audio/*')
+    run('echo -n > data/train.txt')
+    run('echo -n > data/test.txt')
 
 
 
