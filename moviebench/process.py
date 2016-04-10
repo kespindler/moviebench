@@ -94,7 +94,7 @@ def clean_subtitle(text):
 def extract_movie_dialog(name):
     valid_lines = get_dialog_lines_from_movie(name)
     wav = wave.open(op.join(TRACK_DIR, name + '.wav'))
-    f = open(op.join(DATA_DIR, 'raw.txt'), 'w')
+    f = open(op.join(DATA_DIR, 'raw.txt'), 'a')
     for line, wav_data in valid_lines:
         code = '%016x' % random.randrange(16**16)
 
@@ -106,7 +106,6 @@ def extract_movie_dialog(name):
         sub.check_call(['flac', fname])
         os.remove(fname)
 
-        f.seek(2)
         f.write((u'%s,%s,%s\n' % (code, name, line)).encode('utf8'))
 
 
