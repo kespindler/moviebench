@@ -89,7 +89,7 @@ def clean_subtitle(text):
     return text
 
 
-def process_wav(name):
+def extract_movie_dialog(name):
     valid_lines = get_dialog_lines_from_movie(name)
     wav = wave.open(op.join(TRACK_DIR, name + '.wav'))
     f = open(op.join(DATA_DIR, 'raw.txt'))
