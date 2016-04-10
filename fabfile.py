@@ -1,7 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
-from moviebench.rip import rip_tracks
+from fabric.api import *
+from moviebench import rip
 
 
-def process_mkv(src):
-    rip_tracks(src)
+def bootstrap():
+    run('mkdir -p data/audio movies')
+
+
+def rip_tracks(src):
+    rip.rip_tracks(src)
+
+
+def rip_dvd(src):
+    rip.rip_dvd(src)
