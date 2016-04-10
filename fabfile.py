@@ -5,7 +5,7 @@ from moviebench import rip
 
 
 def bootstrap():
-    run('mkdir -p data/audio movies')
+    local('mkdir -p data/audio movies')
 
 
 def rip_tracks(src):
