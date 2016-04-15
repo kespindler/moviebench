@@ -112,11 +112,17 @@ def extract_movie_dialog(name):
 def tally_audio_directory():
     dir_path = op.join(DATA_DIR, 'audio')
     total = 0
-    print 'Counting...'
+    print('Counting...')
     for fname in os.listdir(dir_path):
-        secs = os.system('metaflac --show-total-samples --show-sample-rate ' +
-                   op.join(dir_path, fname) + ' ' + '| tr \'\n\' \' \' | awk \'{print $1/$2}\'')
-        total += float(secs)
+        cmd = ['metaflac', '--show-total-samples', '--show-sample-rate',
+               op.join(dir_path, fname)]
+        p = sub.Popen(cmd, stdout=sub.PIPE, stdin=sub.PIPE, stderr=sub.STDOUT)
+        result, err = p.communicate()
+        if p.returncode:
+            continue
+        frames, framerate = [int(l) for l in result.splitlines()]
+        seconds = frames * 1.0 / framerate
+        total += seconds
     print '%.1f seconds of audio.' % (total, )
     print '%.1f minutes of audio.' % (total / 60, )
     print '%.2f hours of audio.' % (total / 3600, )

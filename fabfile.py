@@ -18,3 +18,7 @@ def rip_dvd(src):
 
 def extract(name):
     process.extract_movie_dialog(name)
+
+
+def count():
+    process.tally_audio_directory()
