@@ -5,6 +5,7 @@ import os.path as op
 
 MOVIE_DIR = 'movies'
 DATA_DIR = 'data'
+AUDIO_DIR = op.join(DATA_DIR, 'audio')
 TRACK_DIR = 'tracks'
 
 

@@ -8,7 +8,8 @@ import os.path as op
 from datetime import datetime
 import random
 import wave
-from moviebench.rip import TRACK_DIR, DATA_DIR
+import numpy as np
+from moviebench.rip import TRACK_DIR, DATA_DIR, AUDIO_DIR
 
 
 def calculate_wav_frame(wav, time):
@@ -98,7 +99,7 @@ def extract_movie_dialog(name):
     for line, wav_data in valid_lines:
         code = '%016x' % random.randrange(16**16)
 
-        fname = op.join(DATA_DIR, 'audio', code + '.wav')
+        fname = op.join(AUDIO_DIR, code + '.wav')
         outwav = wave.open(fname, 'w')
         outwav.setparams(wav.getparams())
         outwav.writeframes(wav_data)
@@ -109,20 +110,30 @@ def extract_movie_dialog(name):
         f.write((u'%s,%s,%s\n' % (code, name, line)).encode('utf8'))
 
 
-def tally_audio_directory():
-    dir_path = op.join(DATA_DIR, 'audio')
-    total = 0
-    print('Counting...')
-    for fname in os.listdir(dir_path):
-        cmd = ['metaflac', '--show-total-samples', '--show-sample-rate',
-               op.join(dir_path, fname)]
-        p = sub.Popen(cmd, stdout=sub.PIPE, stdin=sub.PIPE, stderr=sub.STDOUT)
-        result, err = p.communicate()
-        if p.returncode:
-            continue
-        frames, framerate = [int(l) for l in result.splitlines()]
-        seconds = frames * 1.0 / framerate
-        total += seconds
-    print '%.1f seconds of audio.' % (total, )
-    print '%.1f minutes of audio.' % (total / 60, )
-    print '%.2f hours of audio.' % (total / 3600, )
+def band_pass(signal, lowest=None, highest=None):
+    lowest = lowest or 0
+    highest = highest or signal.size
+    afft = np.fft.fft(signal)
+    afft[:lowest] = 0
+    afft[highest:] = 0
+    filtered = np.fft.ifft(afft)
+    real_filtered = np.real(filtered)
+    real_filtered /= np.max(np.abs(real_filtered))
+    return real_filtered
+
+
+def amplitude_spikes(signal, window_size=None, spike_threshold=None):
+    top_half = np.clip(signal, 0, 1)
+    window_size = window_size or 2880
+    spike_threshold = spike_threshold or 0.50
+    maxed_top_half = top_half.copy()
+
+    for i in range(top_half.size):
+        min_i = max(0, i - window_size)
+        max_i = min(i + window_size, top_half.size)
+        max_value = top_half[min_i:max_i].max()
+        maxed_top_half[i] = max_value if top_half[i] == max_value else 0
+
+    maxed_top_half = np.clip(maxed_top_half, spike_threshold, 1)
+    where = np.where(maxed_top_half > spike_threshold)
+    return where[0]
