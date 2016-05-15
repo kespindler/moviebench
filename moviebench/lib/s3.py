@@ -6,7 +6,7 @@ import os.path as op
 def fetch_tracks(name):
     bucket_name = config.get('s3.buckets.tracks')
     sess = session.get_session()
-    s3 = sess.get_service('s3')
+    s3 = sess.create_client('s3')
     operation = s3.get_operation('GetObject')
     endpoint = s3.get_endpoint('us-east-1')
     key = op.join(name, name + '.flac')
