@@ -41,4 +41,3 @@ def check_quality(movie=None):
     if movie is not None:
         filter_func = lambda x: x == movie
     data.check_quality(filter_func)
-

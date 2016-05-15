@@ -7,3 +7,4 @@ tracks/
 .ipynb_checkpoints/
 *.wav
 config/secrets.yaml
+keys
