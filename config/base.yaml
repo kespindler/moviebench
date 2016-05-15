@@ -1,3 +1,6 @@
+extends:
+- secrets.yaml
+
 s3:
   buckets:
     tracks: moviebench-tracks
