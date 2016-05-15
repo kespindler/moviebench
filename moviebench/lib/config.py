@@ -36,4 +36,4 @@ def get(key):
         d = d.get(k)
     return d
 
-load_config('development.yaml')
+load_config('base.yaml')
