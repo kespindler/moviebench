@@ -7,20 +7,16 @@ def fetch_tracks(name):
     bucket_name = config.get('s3.buckets.tracks')
     sess = session.get_session()
     s3 = sess.create_client('s3')
-    operation = s3.get_operation('GetObject')
-    endpoint = s3.get_endpoint('us-east-1')
     key = op.join(name, name + '.flac')
-    response, flac_data = operation.call(
-        endpoint,
-        bucket=bucket_name,
-        key=key
+    response1 = s3.get_object(
+        Bucket=bucket_name,
+        Key=key,
     )
 
     key = op.join(name, name + '.srt')
-    response, srt_data = operation.call(
-        endpoint,
-        bucket=bucket_name,
-        key=key
+    response2 = s3.get_object(
+        Bucket=bucket_name,
+        Key=key,
     )
 
-    return flac_data, srt_data
+    return response1, response2
