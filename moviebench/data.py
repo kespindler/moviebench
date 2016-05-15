@@ -5,6 +5,7 @@ from moviebench.rip import AUDIO_DIR, DATA_DIR
 from moviebench.process import band_pass, amplitude_spikes
 import soundfile as sf
 from collections import OrderedDict
+import numba as na
 
 
 def build_subtitle_map(filter_func=None):
@@ -19,6 +20,7 @@ def build_subtitle_map(filter_func=None):
     return subtitle_map
 
 
+@na.jit(nopython=True)
 def check_quality(filter_func=None):
     subtitle_map = build_subtitle_map(filter_func=filter_func)
     for audio_hash, text in subtitle_map.iteritems():
