@@ -1,0 +1,5 @@
+s3:
+  buckets:
+    tracks: moviebench-tracks
+    data: moviebench-data
+    batches: moviebench-batches
