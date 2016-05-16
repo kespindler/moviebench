@@ -55,6 +55,11 @@ def upload_movie_to_s3(mkv_fpath):
     :param fpath:
     :return:
     """
+    proc = sub.Popen(['ffmpeg', '-i', mkv_fpath], stderr=sub.PIPE, stdout=sub.PIPE)
+    out, err = proc.communicate()
+    if 'Subtitle' in err:
+        print 'No subtitles found.'
+        return
     name, wav_fpath, srt_fpath = rip.rip_tracks(mkv_fpath)
     flac_fpath = op.splitext(wav_fpath)[0] + '.flac'
     sub.check_call(['sox', wav_fpath, flac_fpath])
