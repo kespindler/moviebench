@@ -1,4 +1,4 @@
-yaml
+pyyaml
 botocore
 numpy
 wave
