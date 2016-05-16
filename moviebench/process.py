@@ -9,7 +9,9 @@ from datetime import datetime
 import random
 import wave
 import numpy as np
+from moviebench.lib import s3
 from moviebench.rip import TRACK_DIR, DATA_DIR, AUDIO_DIR
+from tempfile import NamedTemporaryFile
 
 
 def calculate_wav_frame(wav, time):
@@ -25,16 +27,14 @@ def calculate_wav_frame(wav, time):
     return frame
 
 
-def get_dialog_lines_from_movie(name):
+def get_dialog_lines_from_movie(wav_file, dialog_file):
     """Given the name of a movie, read the srt and wav from file system, and return
     the dialog lines as (dialog text, wav data) tuples.
 
     :param name:
     :return:
     """
-    with open(op.join(TRACK_DIR, name + '.srt'), 'rU') as f:
-        lines = f.readlines()
-    wav = wave.open(op.join(TRACK_DIR, name + '.wav'))
+    lines = dialog_file.readlines()
     result_lines = []
     i = 0
     while i < len(lines):
@@ -44,10 +44,10 @@ def get_dialog_lines_from_movie(name):
             continue
         times = [datetime.strptime(stamp, "%H:%M:%S,%f").time()
                  for stamp in match.groups()]
-        startframe = calculate_wav_frame(wav, times[0])
-        endframe = calculate_wav_frame(wav, times[1])
-        wav.setpos(startframe)
-        data = wav.readframes(endframe - startframe)
+        startframe = calculate_wav_frame(wav_file, times[0])
+        endframe = calculate_wav_frame(wav_file, times[1])
+        wav_file.setpos(startframe)
+        data = wav_file.readframes(endframe - startframe)
 
         i += 1
         text = ""
@@ -69,7 +69,6 @@ def write_as_flac(wav_bytes):
     """
     p = sub.Popen(['flac', '-'], stdout=sub.PIPE, stdin=sub.PIPE, stderr=sub.STDOUT)
     result = p.communicate(input=wav_bytes)[0]
-    print result
     return result
 
 
@@ -93,9 +92,11 @@ def clean_subtitle(text):
 
 
 def extract_movie_dialog(name):
-    valid_lines = get_dialog_lines_from_movie(name)
+    wav = wave.open(op.join(TRACK_DIR, name + '.wav'))
     wav = wave.open(op.join(TRACK_DIR, name + '.wav'))
     f = open(op.join(DATA_DIR, 'raw.txt'), 'a')
+    valid_lines = get_dialog_lines_from_movie(name)
+
     for line, wav_data in valid_lines:
         code = '%016x' % random.randrange(16**16)
 
@@ -137,3 +138,15 @@ def amplitude_spikes(signal, window_size=None, spike_threshold=None):
     maxed_top_half = np.clip(maxed_top_half, spike_threshold, 1)
     where = np.where(maxed_top_half > spike_threshold)
     return where[0]
+
+
+def split_s3_track(name):
+    temp_flac, temp_srt = s3.fetch_tracks(name)
+    wav_fpath = temp_flac.name + '.wav'
+    sub.check_call(['flac', '-d', temp_flac.name])
+    wav_file = wave.open(wav_fpath)
+    valid_lines = get_dialog_lines_from_movie(wav_file, temp_srt)
+    lines, wav_data = zip(valid_lines)
+    s3.upload_lines(name, lines, wav_data, wav_file.getparams())
+    os.remove(temp_srt.name)
+    os.remove(temp_flac.name)
