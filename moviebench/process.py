@@ -34,6 +34,7 @@ def get_dialog_lines_from_movie(wav_file, dialog_file):
     :param name:
     :return:
     """
+    dialog_file.seek(0)
     lines = dialog_file.readlines()
     result_lines = []
     i = 0
@@ -51,7 +52,7 @@ def get_dialog_lines_from_movie(wav_file, dialog_file):
 
         i += 1
         text = ""
-        while lines[i] != "\n":
+        while not (lines[i] == '\n' or lines[i] == '\r\n'):
             text += lines[i]
             i += 1
         text = clean_subtitle(text)
@@ -79,6 +80,7 @@ def clean_subtitle(text):
     :return:
     """
     text = text.replace('\n', ' ').strip()
+    text = text.replace('\r\n', ' ').strip()
     text = re.sub('\[.*?\]', "", text)
     text = re.sub('\(.*?\)', "", text)
     text = re.sub('\<.*?\>', "", text)
@@ -143,10 +145,10 @@ def amplitude_spikes(signal, window_size=None, spike_threshold=None):
 def split_s3_track(name):
     temp_flac, temp_srt = s3.fetch_tracks(name)
     wav_fpath = temp_flac.name + '.wav'
-    sub.check_call(['flac', '-d', temp_flac.name])
+    sub.check_call(['sox', temp_flac.name, wav_fpath])
     wav_file = wave.open(wav_fpath)
     valid_lines = get_dialog_lines_from_movie(wav_file, temp_srt)
-    lines, wav_data = zip(valid_lines)
+    lines, wav_data = zip(*valid_lines)
     s3.upload_lines(name, lines, wav_data, wav_file.getparams())
     os.remove(temp_srt.name)
     os.remove(temp_flac.name)
