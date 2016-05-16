@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 from fabric.api import *
-from moviebench import rip, process, data
+from moviebench import rip, process
 from moviebench.lib import s3
 import os.path as op
 import subprocess as sub
