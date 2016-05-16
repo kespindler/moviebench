@@ -2,3 +2,4 @@ pyyaml
 botocore
 numpy
 wave
+fabric
