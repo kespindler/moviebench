@@ -51,7 +51,7 @@ def rip_tracks(src):
     print cmd2
     os.system(cmd2)
 
-    wav = op.join(TRACK_DIR, name+".wav")
+    wav = op.join(TRACK_DIR, name + '.wav')
     cmd3 = "ffmpeg -i %s -ac 1 %s" % (src, wav)
     print cmd3
     os.system(cmd3)
