@@ -80,7 +80,7 @@ def clean_subtitle(text):
     :return:
     """
     text = text.replace('\n', ' ').strip()
-    text = text.replace('\r\n', ' ').strip()
+    text = text.replace('\r', ' ').strip()
     text = re.sub('\[.*?\]', "", text)
     text = re.sub('\(.*?\)', "", text)
     text = re.sub('\<.*?\>', "", text)
@@ -88,6 +88,7 @@ def clean_subtitle(text):
     text = text.replace(u'♪', u"")
     text = re.sub('^([a-zA-Z]*:)', "", text)
     text = text.strip().upper()
+    text = ' '.join(text.split())
     if ":" in text or not text:
         return None
     return text

@@ -7,6 +7,13 @@ import wave
 
 
 def write_stream_to_temp_file(stream):
+    """Write the stream to a temporary file.
+    Note this temp file isn't cleaned up automatically.
+    You have to do it.
+
+    :param stream:
+    :return:
+    """
     temp_file = open('/tmp/%s' % uuid4(), 'w+b')
     while True:
         d = stream.read(1024 * 512)
@@ -18,6 +25,10 @@ def write_stream_to_temp_file(stream):
 
 
 def fetch_tracks(name):
+    """Download tracks (wav, srt) of the movie from s3.
+    :param name:
+    :return: file objects (wav, srt)
+    """
     bucket_name = config.get('s3.buckets.tracks')
     sess = session.get_session()
     sess.set_credentials(config.get('s3.access_key'), config.get('s3.access_secret'))
@@ -42,6 +53,15 @@ def fetch_tracks(name):
 
 
 def upload_lines(name, lines, wav_data, wav_params):
+    """Takes movie name, the lines of the movie, list of wav chunks, and the params of the wav.
+    Uploads them all to s3.
+
+    :param name:
+    :param lines:
+    :param wav_data:
+    :param wav_params:
+    :return:
+    """
     bucket_name = config.get('s3.buckets.data')
     sess = session.get_session()
     sess.set_credentials(config.get('s3.access_key'), config.get('s3.access_secret'))
