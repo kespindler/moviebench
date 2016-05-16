@@ -46,7 +46,7 @@ def rip_tracks(src):
     """
     assert src.endswith('.mkv')
     name = os.path.splitext(os.path.basename(src))[0]
-    srt = op.join(TRACK_DIR, name+".srt")
+    srt = op.join(TRACK_DIR, name + '.srt')
     cmd2 = "ffmpeg -i %s -vn -an -c:s:0 srt %s" % (src, srt)
     print cmd2
     os.system(cmd2)
@@ -55,4 +55,4 @@ def rip_tracks(src):
     cmd3 = "ffmpeg -i %s -ac 1 %s" % (src, wav)
     print cmd3
     os.system(cmd3)
-    return wav, srt
+    return name, wav, srt

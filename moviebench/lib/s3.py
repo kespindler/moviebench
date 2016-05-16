@@ -52,6 +52,29 @@ def fetch_tracks(name):
     return temp_flac, temp_srt
 
 
+def upload_tracks(name, flac_fpath, srt_fpath):
+    bucket_name = config.get('s3.buckets.tracks')
+    sess = session.get_session()
+    sess.set_credentials(config.get('s3.access_key'), config.get('s3.access_secret'))
+    s3 = sess.create_client('s3')
+
+    key = op.join(name, name + '.flac')
+    with open(flac_fpath) as f:
+        s3.put_object(
+            Body=f,
+            Bucket=bucket_name,
+            Key=key,
+        )
+
+    key = op.join(name, name + '.srt')
+    with open(srt_fpath) as f:
+        s3.put_object(
+            Body=f,
+            Bucket=bucket_name,
+            Key=key,
+        )
+
+
 def upload_lines(name, lines, wav_data, wav_params):
     """Takes movie name, the lines of the movie, list of wav chunks, and the params of the wav.
     Uploads them all to s3.

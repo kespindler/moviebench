@@ -2,7 +2,9 @@
 # coding: utf-8
 from fabric.api import *
 from moviebench import rip, process, data
+from moviebench.lib import s3
 import os.path as op
+import subprocess as sub
 
 
 def clean():
@@ -45,3 +47,15 @@ def check_quality(movie=None):
 
 def split_s3_track(name):
     process.split_s3_track(name)
+
+
+def upload_movie_to_s3(mkv_fpath):
+    """Takes path to an mkv and uploads (as srt and flac) to s3.
+
+    :param fpath:
+    :return:
+    """
+    name, wav_fpath, srt_fpath = rip.rip_tracks(mkv_fpath)
+    flac_fpath = op.splitext(wav_fpath)[0] + '.flac'
+    sub.check_call(['sox', wav_fpath, flac_fpath])
+    s3.upload_tracks(name, flac_fpath, srt_fpath)
