@@ -3,3 +3,4 @@ botocore
 numpy
 wave
 fabric
+PySoundFile

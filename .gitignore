@@ -8,3 +8,4 @@ tracks/
 *.wav
 config/secrets.yaml
 keys
+env

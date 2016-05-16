@@ -8,4 +8,9 @@ secrets:
 mysql:
 	mysql -u awsuser -p Y07CBZS2QWWQdWb39ZQOZyHdyWMOLsHp
 
+bootstrap:
+	brew install sox
+	virtualenv env
+	. env/bin/activate && pip install -r requirements.txt
+
 .PHONY: ssh
